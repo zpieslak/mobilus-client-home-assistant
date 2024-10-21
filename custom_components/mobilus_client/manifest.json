@@ -1,0 +1,10 @@
+{
+  "domain": "mobilus_client",
+  "name": "Mobilus Integration",
+  "version": "0.1",
+  "requirements": [
+    "mobilus-client==0.1.4"
+  ],
+  "codeowners": [],
+  "iot_class": "local_polling"
+}

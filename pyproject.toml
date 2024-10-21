@@ -1,0 +1,13 @@
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["homeassistant.*", "voluptuous.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+ignore = ["D", "PT"]
+select = ["ALL"]
