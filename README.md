@@ -11,10 +11,10 @@ This integration allows you to control Mobilus Cosmo GTW devices from Home Assis
 
 Locate Your Home Assistant configuration directory (this is typically found at `/var/lib/home_assistant`, depending on your installation method).
 
-Copy the `mobilus_client` folder into the `custom_components` directory within your Home Assistant configuration directory. If the `custom_components` directory doesn't exist, create it.
+Copy the `mobilus` folder into the `custom_components` directory within your Home Assistant configuration directory. If the `custom_components` directory doesn't exist, create it.
 
 ```ruby
-cp -r custom_components/mobilus_client /var/lib/home_assistant/custom_components/
+cp -r custom_components/mobilus /var/lib/home_assistant/custom_components/
 ```
 
 ## Configuration
@@ -23,7 +23,7 @@ Add the following to your `configuration.yaml` file:
 
 ```yaml
 cover:
-  - platform: mobilus_client
+  - platform: mobilus
     host: MOBILUS_COSMO_GTW_IP
     username: MOBILUS_COSMO_GTW_USERNAME
     password: MOBILUS_COSMO_GTW_PASSWORD
@@ -33,7 +33,7 @@ Example:
 
 ```yaml
 cover:
-  - platform: mobilus_client
+  - platform: mobilus
     host: 192.168.2.1
     username: admin
     password: mypassword
@@ -43,7 +43,7 @@ cover:
 
 Currently, the integration is tested only with Mobilus COSMO 2WAY shutters.
 
-The Mobilus COSMO 2WAY shutters do not report their state. As a result, the cover entities in Home Assistant will not reflect the actual position of the shutters after they are moved.
+The Mobilus COSMO 2WAY shutters state is updated every 10 minutes or on each action (open, close, stop).
 
 ## Usage
 
@@ -57,6 +57,6 @@ To enable debug logs, add the following to your `configuration.yaml` file:
 logger:
   default: warning
   logs:
-    custom_components.mobilus_client: debug
+    custom_components.mobilus: debug
     mobilus_client: debug
 ```

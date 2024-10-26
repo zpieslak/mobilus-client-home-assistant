@@ -1,7 +1,7 @@
 {
-  "domain": "mobilus_client",
+  "domain": "mobilus",
   "name": "Mobilus Cosmo GTW Integration",
-  "version": "0.1",
+  "version": "0.1.0",
   "requirements": [
     "mobilus-client==0.1.4"
   ],
