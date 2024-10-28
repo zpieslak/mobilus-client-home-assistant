@@ -26,20 +26,22 @@ class MobilusDeviceStateList:
 
 @dataclass
 class MobilusDeviceState:
-    EVENT_NUMBER_IS_MOVING = 7
-
     data: dict[str, Any]
 
     @cached_property
     def position(self) -> int | None:
         if self.data["value"].endswith("%"):
             return int(self.data["value"].rstrip("%"))
+
+        # To prevent additonal polling to get the current position,
+        # assume that opening shutter will be 100% and closing will be 0%.
+        # If stop is sent the status will be synchronized
+        if self.data["value"] == "UP":
+            return 100
+        if self.data["value"] == "DOWN":
+            return 0
+
         return None
-
-    @cached_property
-    def is_moving(self) -> bool:
-        return int(self.data["eventNumber"]) == self.EVENT_NUMBER_IS_MOVING
-
 
 class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]): # type: ignore[misc]
     def __init__(self, hass: HomeAssistant, client: MobilusClientApp) -> None:

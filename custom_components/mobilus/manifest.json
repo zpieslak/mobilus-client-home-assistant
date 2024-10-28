@@ -10,7 +10,7 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/zpieslak/mobilus-client-home-assistant",
   "requirements": [
-    "mobilus-client==0.1.4"
+    "mobilus-client==0.1.5"
   ],
   "version": "0.1.0"
 }
