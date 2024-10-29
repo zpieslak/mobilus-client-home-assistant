@@ -1,14 +1,14 @@
 {
   "domain": "mobilus",
-  "name": "Mobilus Cosmo GTW Integration",
+  "name": "Mobilus Cosmo GTW",
   "codeowners": [
     "@zpieslak"
   ],
   "dependencies": [],
-  "documentation": "https://github.com/zpieslak/mobilus-client-home-assistant/issues",
+  "documentation": "https://github.com/zpieslak/mobilus-client-home-assistant",
   "integration_type": "hub",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/zpieslak/mobilus-client-home-assistant",
+  "issue_tracker": "https://github.com/zpieslak/mobilus-client-home-assistant/issues",
   "requirements": [
     "mobilus-client==0.1.5"
   ],
