@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from typing import TYPE_CHECKING, Any
@@ -112,10 +113,24 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type:
         return device_status.position
 
     async def async_open_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
-        await self.async_set_cover_position(position=100)
+        _LOGGER.info("Opening cover %s", self.device["name"])
+
+        await self.hass.async_add_executor_job(
+            self.client.call,
+            [("call_events", {"device_id": self.device["id"], "value": "UP"})],
+        )
+
+        await self.coordinator.async_request_refresh()
 
     async def async_close_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
-        await self.async_set_cover_position(position=0)
+        _LOGGER.info("Closing cover %s", self.device["name"])
+
+        await self.hass.async_add_executor_job(
+            self.client.call,
+            [("call_events", {"device_id": self.device["id"], "value": "DOWN"})],
+        )
+
+        await self.coordinator.async_request_refresh()
 
     async def async_stop_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
         _LOGGER.info("Stopping cover %s", self.device["name"])
@@ -125,6 +140,7 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type:
             [("call_events", {"device_id": self.device["id"], "value": "STOP"})],
         )
 
+        await asyncio.sleep(15)
         await self.coordinator.async_request_refresh()
 
     async def async_set_cover_position(self, position: int, **_kwargs: Any) -> None: # noqa: ANN401
