@@ -45,6 +45,8 @@ Currently, the integration is tested only with Mobilus COSMO 2WAY shutters.
 
 The Mobilus COSMO 2WAY shutters state is updated every 10 minutes or on each action (open, close, stop).
 
+If state updates are not working, please restart COSMO GTW device, it looks like it forcefully refreshes the state on each boot.
+
 ## Usage
 
 Once configured, you can control your shutters through the Home Assistant UI or include them in automations and scripts.

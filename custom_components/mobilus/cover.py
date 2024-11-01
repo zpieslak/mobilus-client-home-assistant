@@ -13,7 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from mobilus_client.app import App as MobilusClientApp
 from mobilus_client.config import Config as MobilusClientConfig
 
-from .const import DOMAIN
+from .const import DOMAIN, POSITION_SUPPORTED_DEVICES, SUPPORTED_DEVICES
 from .coordinator import MobilusCoordinator
 
 if TYPE_CHECKING:
@@ -56,18 +56,29 @@ async def async_setup_platform(
         return
 
     devices = response[0].get("devices", [])
+
     if not devices:
         _LOGGER.warning("No devices found in the devices list.")
+        return
+
+    # Currently non cover devices are not supported
+    supported_devices = [
+        device for device in devices
+        if device["type"] in SUPPORTED_DEVICES
+    ]
+
+    if not supported_devices:
+        _LOGGER.warning("No supported devices found in the devices list.")
         return
 
     coordinator = MobilusCoordinator(hass, client)
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-      [MobilusCover(device, client, coordinator) for device in devices],
+      [MobilusCover(device, client, coordinator) for device in supported_devices],
     )
 
-class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type: ignore[misc]
+class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
     def __init__(self, device: dict[str, Any], client: MobilusClientApp, coordinator: MobilusCoordinator) -> None:
         self.client = client
         self.coordinator = coordinator
@@ -87,12 +98,16 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type:
 
     @property
     def supported_features(self) -> CoverEntityFeature:
-        return (
+        supported_features = (
             CoverEntityFeature.OPEN
             | CoverEntityFeature.CLOSE
-            | CoverEntityFeature.SET_POSITION
             | CoverEntityFeature.STOP
         )
+
+        if self.device["type"] in POSITION_SUPPORTED_DEVICES:
+            supported_features |= CoverEntityFeature.SET_POSITION
+
+        return supported_features
 
     @property
     def is_closed(self) -> bool | None:
@@ -119,7 +134,6 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type:
             self.client.call,
             [("call_events", {"device_id": self.device["id"], "value": "UP"})],
         )
-
         await self.coordinator.async_request_refresh()
 
     async def async_close_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
@@ -129,7 +143,6 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type:
             self.client.call,
             [("call_events", {"device_id": self.device["id"], "value": "DOWN"})],
         )
-
         await self.coordinator.async_request_refresh()
 
     async def async_stop_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
@@ -140,15 +153,16 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):  # type:
             [("call_events", {"device_id": self.device["id"], "value": "STOP"})],
         )
 
+        # Added arbitrary delay as proper state is returned after a while
         await asyncio.sleep(15)
         await self.coordinator.async_request_refresh()
 
-    async def async_set_cover_position(self, position: int, **_kwargs: Any) -> None: # noqa: ANN401
-        _LOGGER.info("Setting cover %s position to %s", self.device["name"], position)
+    async def async_set_cover_position(self, **kwargs: Any) -> None: # noqa: ANN401
+        _LOGGER.info("Setting cover %s position to %s", self.device["name"], kwargs["position"])
 
         await self.hass.async_add_executor_job(
             self.client.call,
-            [("call_events", {"device_id": self.device["id"], "value": f"{position}%"})],
+            [("call_events", {"device_id": self.device["id"], "value": f"{kwargs['position']}%"})],
         )
 
         await self.coordinator.async_request_refresh()
