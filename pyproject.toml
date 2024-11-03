@@ -1,4 +1,36 @@
+[project]
+name = "mobilus-client-home-assistant"
+dynamic = ["version"]
+dependencies = [
+  "homeassistant>=2022.5.0",
+  "mobilus-client==0.1.5",
+]
+
+[project.optional-dependencies]
+test = [
+  "coverage>=7.0",
+  "mypy>=1.0",
+  "pytest>=8.0",
+  "pytest-asyncio>=0.20.0",
+  "pytest-homeassistant-custom-component>=0.8",
+  "ruff>=0.6.0",
+]
+
+[tool.setuptools]
+packages = ["custom_components"]
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:"
+]
+
+[tool.coverage.run]
+omit = [
+  "tests/*"
+]
+
 [tool.mypy]
+explicit_package_bases = true
 strict = true
 
 [[tool.mypy.overrides]]
@@ -9,5 +41,11 @@ ignore_missing_imports = true
 line-length = 120
 
 [tool.ruff.lint]
-ignore = ["D", "PT"]
+ignore = ["D"]
 select = ["ALL"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004"]
