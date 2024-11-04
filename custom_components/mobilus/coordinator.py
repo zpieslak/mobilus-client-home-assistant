@@ -43,7 +43,7 @@ class MobilusDeviceState:
 
         return None
 
-class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]): # type: ignore[misc]
+class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]):
     def __init__(self, hass: HomeAssistant, client: MobilusClientApp) -> None:
         self.client = client
 

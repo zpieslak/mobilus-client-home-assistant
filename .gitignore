@@ -1,4 +1,5 @@
 __pycache__
+mobilus_client_home_assistant.egg-info/*
 tmp
 .coverage
 .tool-versions
