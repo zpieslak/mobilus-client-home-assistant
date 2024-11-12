@@ -1,6 +1,10 @@
+from homeassistant.const import Platform
+
 from .device import MobilusDevice
 
 DOMAIN = "mobilus"
+
+PLATFORMS = [Platform.COVER]
 
 NOT_SUPPORTED_DEVICES = (
     MobilusDevice.CGR,

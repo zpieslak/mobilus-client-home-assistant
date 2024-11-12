@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Podaj dane połączenia",
+        "description": "Proszę podać dane do połączenia z bramką Mobilus COSMO GTW.",
+        "data": {
+          "host": "Adres IP / Host",
+          "username": "Nazwa użytkownika",
+          "password": "Hasło"
+        }
+      },
+      "reconfigure": {
+        "title": "Zmień dane połączenia",
+        "description": "Proszę podać dane do połączenia z bramką Mobilus COSMO GTW.",
+        "data": {
+          "host": "Adres IP / Host",
+          "username": "Nazwa użytkownika",
+          "password": "Hasło"
+        }
+      }
+    },
+    "error": {
+      "entry_not_found": "Konfiguracja nie została znaleziona.",
+      "reconfigure_successful": "Ponowna konfiguracja została zapisana. W przypadku błędnych danych, proszę ponownie wprowadzić poprawne dane."
+    }
+  }
+}

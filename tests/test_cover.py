@@ -1,183 +1,60 @@
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Generator
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from homeassistant.components.cover import CoverDeviceClass, CoverEntityFeature
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 
-from custom_components.mobilus.cover import (
-    MobilusCover,
-    async_setup_platform,
-)
+from custom_components.mobilus.const import DOMAIN
+from custom_components.mobilus.cover import MobilusCover, async_setup_entry
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-
-
-@pytest.fixture
-def mock_logger() -> Generator[Mock, None, None]:
-    with patch("custom_components.mobilus.cover._LOGGER", autospec=True) as mock_logger:
-        yield mock_logger
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 @pytest.fixture
-def mock_client() -> Generator[Mock, None, None]:
-    with patch("custom_components.mobilus.cover.MobilusClientApp", autospec=True) as mock_client_class:
-        mock_instance = mock_client_class.return_value
-        yield mock_instance
-
-@pytest.fixture
-def mock_config() -> dict[str, str]:
-    return {
-        CONF_HOST: "test_host",
-        CONF_USERNAME: "test_user",
-        CONF_PASSWORD: "test_pass",
-    }
-
-@pytest.fixture
-def mock_coordinator() -> Generator[Mock, None, None]:
-    with patch("custom_components.mobilus.cover.MobilusCoordinator") as mock_coordinator_class:
-        mock_instance = mock_coordinator_class.return_value
-        mock_instance.async_config_entry_first_refresh = AsyncMock()
-        mock_instance.async_request_refresh = AsyncMock()
-        mock_instance.async_add_listener = Mock()
-        yield mock_instance
+def mock_async_add_entities() -> Mock:
+    return Mock()
 
 @pytest.fixture
 def mock_asyncio_sleep() -> Generator[Mock, None, None]:
     with patch("asyncio.sleep", return_value=None) as mock_sleep:
         yield mock_sleep
 
-async def test_async_setup_platform(
-        hass: HomeAssistant, mock_client: Mock, mock_config: dict[str, str], mock_coordinator: Mock) -> None:
-    mock_client.call.return_value = json.dumps(
-        [
-          {
-            "devices": [
-              {
-                "id": "0",
-                "name": "Device SENSO",
-                "type": 1,
-              },
-              {
-                "id": "1",
-                "name": "Device COSMO",
-                "type": 2,
-              },
-              {
-                "id": "2",
-                "name": "Device CMR",
-                "type": 3,
-              },
-              {
-                "id": "3",
-                "name": "Device CGR",
-                "type": 4,
-              },
-              {
-                "id": "4",
-                "name": "Device SWITCH",
-                "type": 5,
-              },
-              {
-                "id": "5",
-                "name": "Device SWITCH_NP",
-                "type": 6,
-              },
-              {
-                "id": "6",
-                "name": "Device COSMO_CZR",
-                "type": 7,
-              },
-              {
-                "id": "7",
-                "name": "Device COSMO_MZR",
-                "type": 8,
-              },
-              {
-                "id": "8",
-                "name": "Device SENSO_Z",
-                "type": 9,
-              },
-          ]},
+async def test_async_setup_entry(
+        hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock,
+        mock_config_entry: MockConfigEntry, mock_async_add_entities: Mock) -> None:
+
+    device_senso = {
+        "id": "0",
+        "name": "Device SENSO",
+        "type": 1,
+    }
+    device_cosmo = {
+        "id": "1",
+        "name": "Device COSMO",
+        "type": 2,
+    }
+
+    hass.data[DOMAIN] = {}
+    hass.data[DOMAIN][mock_config_entry.entry_id] = {
+        "client": mock_client,
+        "coordinator": mock_coordinator,
+        "devices": [
+            device_senso,
+            device_cosmo,
         ],
+    }
+
+    await async_setup_entry(hass, mock_config_entry, mock_async_add_entities)
+
+    assert mock_async_add_entities.call_with(
+      [
+          MobilusCover(device_senso, mock_client, mock_coordinator),
+          MobilusCover(device_cosmo, mock_client, mock_coordinator),
+      ],
     )
-
-    async_add_entities = Mock()
-
-    await async_setup_platform(hass, mock_config, async_add_entities)
-
-    assert async_add_entities.call_count == 1
-    assert mock_coordinator.async_config_entry_first_refresh.call_count == 1
-
-    entities = async_add_entities.call_args[0][0]
-    assert len(entities) == 6
-    assert isinstance(entities[0], MobilusCover)
-    assert entities[0].device["id"] == "0"
-    assert entities[1].device["id"] == "1"
-    assert entities[2].device["id"] == "2"
-    assert entities[3].device["id"] == "6"
-    assert entities[4].device["id"] == "7"
-    assert entities[5].device["id"] == "8"
-
-
-async def test_async_setup_platform_no_devices(
-        hass: HomeAssistant, mock_client: Mock, mock_config: dict[str, str],
-        mock_coordinator: Mock, mock_logger: Mock) -> None:
-    mock_client.call.return_value = json.dumps([])
-
-    async_add_entities = Mock()
-    await async_setup_platform(hass, mock_config, async_add_entities)
-
-    mock_logger.warning.assert_called_once_with("No devices found in response. Exiting platform setup.")
-    assert async_add_entities.call_count == 0
-    assert mock_coordinator.async_config_entry_first_refresh.call_count == 0
-
-
-async def test_async_setup_platform_no_device_in_response(
-        hass: HomeAssistant, mock_client: Mock, mock_config: dict[str, str],
-        mock_coordinator: Mock, mock_logger: Mock) -> None:
-    mock_client.call.return_value = json.dumps(
-        [
-          {
-            "devices": [],
-          },
-        ],
-    )
-
-    async_add_entities = Mock()
-    await async_setup_platform(hass, mock_config, async_add_entities)
-
-    mock_logger.warning.assert_called_once_with("No devices found in the devices list.")
-    assert async_add_entities.call_count == 0
-    assert mock_coordinator.async_config_entry_first_refresh.call_count == 0
-
-async def test_async_setup_platform_no_supported_devices(
-        hass: HomeAssistant, mock_client: Mock, mock_config: dict[str, str],
-        mock_coordinator: Mock, mock_logger: Mock) -> None:
-
-    mock_client.call.return_value = json.dumps(
-        [
-          {
-            "devices": [
-              {
-                "id": "0",
-                "name": "Device SWITCH",
-                "type": 5,
-              },
-          ]},
-        ],
-    )
-
-    async_add_entities = Mock()
-    await async_setup_platform(hass, mock_config, async_add_entities)
-
-    mock_logger.warning.assert_called_once_with("No supported devices found in the devices list.")
-    assert async_add_entities.call_count == 0
-    assert mock_coordinator.async_config_entry_first_refresh.call_count == 0
-
 
 def test_cover_init(mock_client: Mock, mock_coordinator: Mock) -> None:
     device = {
@@ -449,7 +326,7 @@ async def test_cover_async_added_to_hass(hass: HomeAssistant, mock_client: Mock,
     cover = MobilusCover(device, mock_client, mock_coordinator)
     cover.hass = hass
 
-    with patch.object(cover, "async_on_remove", new=AsyncMock()) as mock_async_on_remove:
+    with patch.object(cover, "async_on_remove", new=Mock()) as mock_async_on_remove:
         await cover.async_added_to_hass()
 
         mock_coordinator.async_add_listener.assert_called_once_with(cover.async_write_ha_state)

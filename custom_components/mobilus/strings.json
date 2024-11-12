@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Mobilus COSMO GTW",
+        "description": "Please enter your Mobilus COSMO GTW host and credentials.",
+        "data": {
+          "host": "IP Address / Host",
+          "username": "Username",
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Mobilus COSMO GTW",
+        "description": "Please enter your Mobilus COSMO GTW host and credentials.",
+        "data": {
+          "host": "IP Address / Host",
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "entry_not_found": "Configuration entry not found.",
+      "reconfigure_successful": "Reconfiguration has been saved. If the data is incorrect, please enter the correct data again."
+    }
+  }
+}
