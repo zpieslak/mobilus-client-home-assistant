@@ -4,13 +4,14 @@
   "codeowners": [
     "@zpieslak"
   ],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/zpieslak/mobilus-client-home-assistant",
   "integration_type": "hub",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/zpieslak/mobilus-client-home-assistant/issues",
   "requirements": [
-    "mobilus-client==0.1.5"
+    "mobilus-client>=0.1.5"
   ],
   "version": "0.1.0"
 }

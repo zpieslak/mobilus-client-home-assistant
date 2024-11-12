@@ -1,81 +1,34 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-import voluptuous
 from homeassistant.components.cover import CoverDeviceClass, CoverEntity, CoverEntityFeature
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
-from homeassistant.helpers import config_validation
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from mobilus_client.app import App as MobilusClientApp
-from mobilus_client.config import Config as MobilusClientConfig
 
-from .const import DOMAIN, POSITION_SUPPORTED_DEVICES, SUPPORTED_DEVICES
+from .const import DOMAIN, POSITION_SUPPORTED_DEVICES
 from .coordinator import MobilusCoordinator
 
 if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
-    from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+    from mobilus_client.app import App as MobilusClientApp
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = voluptuous.Schema(
-    {
-        voluptuous.Required(CONF_HOST): config_validation.string,
-        voluptuous.Required(CONF_USERNAME): config_validation.string,
-        voluptuous.Required(CONF_PASSWORD): config_validation.string,
-    },
-    extra=voluptuous.ALLOW_EXTRA,
-)
-
-async def async_setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
+    entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
-    _discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-
-    client_config = MobilusClientConfig(
-        gateway_host=config[CONF_HOST],
-        user_login=config[CONF_USERNAME],
-        user_password=config[CONF_PASSWORD],
-    )
-    client = MobilusClientApp(client_config)
-
-    # Retrieve devices list
-    response = await hass.async_add_executor_job(
-        lambda: json.loads(client.call([("devices_list", {})])),
-    )
-
-    if not response:
-        _LOGGER.warning("No devices found in response. Exiting platform setup.")
-        return
-
-    devices = response[0].get("devices", [])
-
-    if not devices:
-        _LOGGER.warning("No devices found in the devices list.")
-        return
-
-    # Currently non cover devices are not supported
-    supported_devices = [
-        device for device in devices
-        if device["type"] in SUPPORTED_DEVICES
-    ]
-
-    if not supported_devices:
-        _LOGGER.warning("No supported devices found in the devices list.")
-        return
-
-    coordinator = MobilusCoordinator(hass, client)
-    await coordinator.async_config_entry_first_refresh()
+    client = hass.data[DOMAIN][entry.entry_id]["client"]
+    devices = hass.data[DOMAIN][entry.entry_id]["devices"]
+    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
 
     async_add_entities(
-      [MobilusCover(device, client, coordinator) for device in supported_devices],
+      [MobilusCover(device, client, coordinator) for device in devices],
     )
 
 class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
@@ -168,6 +121,8 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
         await self.coordinator.async_request_refresh()
 
     async def async_added_to_hass(self) -> None:
-        self.async_on_remove(
-            self.coordinator.async_add_listener(self.async_write_ha_state),
-        )
+        # Add a listener to the coordinator to update the entity's state on data changes
+        coordinator_listener = self.coordinator.async_add_listener(self.async_write_ha_state)
+
+        # Register the listener for cleanup when the entity is removed from Home Assistant
+        self.async_on_remove(coordinator_listener)

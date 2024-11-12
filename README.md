@@ -7,8 +7,8 @@ This integration allows you to control Mobilus Cosmo GTW devices from Home Assis
 
 ## Prerequisites
 
-- Home Assistant installation.
-- Local access to the Mobilus Cosmo GTW IP address and valid login credentials.
+- Home Assistant installation version `2024.4.0` or later (earlier versions are available in older releases - see `hacs.json` for details).
+- Local access to the Mobilus Cosmo GTW IP address and valid login credentials. Internet access is not required and can be disabled on the Mobilus Cosmo GTW device.
 
 ## Installation
 
@@ -31,25 +31,16 @@ cp -r custom_components/mobilus /var/lib/home_assistant/custom_components/
 
 ## Configuration
 
-Add the following to your `configuration.yaml` file:
+Once installed, add the integration to your Home Assistant instance through UI (Settings -> Devices & Services -> Add Integration -> Mobilus COSMO GTW) and follow the UI configure setup.
 
-```yaml
-cover:
-  - platform: mobilus
-    host: MOBILUS_COSMO_GTW_IP
-    username: MOBILUS_COSMO_GTW_USERNAME
-    password: MOBILUS_COSMO_GTW_PASSWORD
-```
+If needed the setup can be reconfigured through "Reconfigure" in the integration settings.
 
-Example:
+Example configuration:
 
-```yaml
-cover:
-  - platform: mobilus
     host: 192.168.2.1
     username: admin
     password: mypassword
-```
+
 
 ## Caveats
 
