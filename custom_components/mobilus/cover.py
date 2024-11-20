@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.components.cover import CoverDeviceClass, CoverEntity, CoverEntityFeature
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, POSITION_SUPPORTED_DEVICES
+from .const import DOMAIN, POSITION_SUPPORTED_DEVICES, TILT_SUPPORTED_DEVICES
 from .coordinator import MobilusCoordinator
 
 if TYPE_CHECKING:
@@ -60,6 +60,13 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
         if self.device["type"] in POSITION_SUPPORTED_DEVICES:
             supported_features |= CoverEntityFeature.SET_POSITION
 
+        if self.device["type"] in TILT_SUPPORTED_DEVICES:
+            supported_features |= (
+                CoverEntityFeature.OPEN_TILT
+                | CoverEntityFeature.CLOSE_TILT
+                | CoverEntityFeature.SET_TILT_POSITION
+            )
+
         return supported_features
 
     @property
@@ -79,6 +86,15 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
           return None
 
         return device_status.position
+
+    @property
+    def current_tilt_position(self) -> int | None:
+        device_status = self.coordinator.data.devices.get(self.device["id"])
+
+        if not device_status or not isinstance(device_status.tilt_position, int):
+            return None
+
+        return device_status.tilt_position
 
     async def async_open_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
         _LOGGER.info("Opening cover %s", self.device["name"])
@@ -118,6 +134,23 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
             [("call_events", {"device_id": self.device["id"], "value": f"{kwargs['position']}%"})],
         )
 
+        await self.coordinator.async_request_refresh()
+
+    async def async_open_cover_tilt(self, **_kwargs: Any) -> None: # noqa: ANN401
+        _LOGGER.info("Opening tilt for cover %s", self.device["name"])
+        await self.async_set_cover_tilt_position(tilt_position=100)
+
+    async def async_close_cover_tilt(self, **_kwargs: Any) -> None: # noqa: ANN401
+        _LOGGER.info("Closing tilt for cover %s", self.device["name"])
+        await self.async_set_cover_tilt_position(tilt_position=0)
+
+    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None: # noqa: ANN401
+        _LOGGER.info("Setting tilt position for cover %s to %s", self.device["name"], kwargs["tilt_position"])
+
+        await self.hass.async_add_executor_job(
+            self.client.call,
+            [("call_events", {"device_id": self.device["id"], "value": f"{kwargs['tilt_position']}%"})],
+        )
         await self.coordinator.async_request_refresh()
 
     async def async_added_to_hass(self) -> None:

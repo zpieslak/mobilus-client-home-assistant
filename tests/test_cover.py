@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generator
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from homeassistant.components.cover import CoverDeviceClass, CoverEntityFeature
@@ -142,6 +142,23 @@ def test_cover_supported_features_senso_z(mock_client: Mock, mock_coordinator: M
         | CoverEntityFeature.SET_POSITION
     )
 
+def test_cover_supported_features_cosmo_czr(mock_client: Mock, mock_coordinator: Mock) -> None:
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+
+    assert cover.supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
+
 def test_cover_is_closed_true(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
     device_status.position = 0
@@ -252,6 +269,53 @@ def test_cover_current_cover_position_no_position(mock_client: Mock, mock_coordi
 
     assert cover.current_cover_position is None
 
+def test_cover_current_tilt_position(mock_client: Mock, mock_coordinator: Mock) -> None:
+    device_status = Mock()
+    device_status.tilt_position = 50
+
+    mock_coordinator.data.devices = {
+        "3": device_status,
+    }
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+
+    assert cover.current_tilt_position == 50
+
+def test_cover_current_tilt_position_no_device_status(mock_client: Mock, mock_coordinator: Mock) -> None:
+    device_status = None
+
+    mock_coordinator.data.devices = {
+        "3": device_status,
+    }
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+
+    assert cover.current_tilt_position is None
+
+def test_cover_current_tilt_position_no_tilt_position(mock_client: Mock, mock_coordinator: Mock) -> None:
+    device_status = Mock()
+    device_status.tilt_position = None
+
+    mock_coordinator.data.devices = {
+        "3": device_status,
+    }
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+
+    assert cover.current_tilt_position is None
+
 async def test_cover_async_open_cover(hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
     device = {
         "id": "3",
@@ -311,6 +375,51 @@ async def test_cover_async_set_cover_position(hass: HomeAssistant, mock_client: 
     cover.hass = hass
 
     await cover.async_set_cover_position(position=50)
+
+    mock_client.call.assert_called_once_with(
+        [("call_events", {"device_id": "3", "value": "50%"})],
+    )
+    mock_coordinator.async_request_refresh.assert_called_once()
+
+async def test_cover_async_open_cover_tilt(hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+    cover.hass = hass
+
+    with patch.object(cover, "async_set_cover_tilt_position", new=AsyncMock()) as mock_async_set_cover_tilt_position:
+        await cover.async_open_cover_tilt()
+
+        mock_async_set_cover_tilt_position.assert_called_once_with(tilt_position=100)
+
+async def test_cover_async_close_cover_tilt(hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+    cover.hass = hass
+
+    with patch.object(cover, "async_set_cover_tilt_position", new=AsyncMock()) as mock_async_set_cover_tilt_position:
+        await cover.async_close_cover_tilt()
+
+        mock_async_set_cover_tilt_position.assert_called_once_with(tilt_position=0)
+
+async def test_cover_async_set_cover_tilt_position(
+        hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+    cover.hass = hass
+
+    await cover.async_set_cover_tilt_position(tilt_position=50)
 
     mock_client.call.assert_called_once_with(
         [("call_events", {"device_id": "3", "value": "50%"})],

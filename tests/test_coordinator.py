@@ -42,10 +42,13 @@ async def test_coordinator_async_update_data_success(hass: HomeAssistant, mock_c
         [
             {
                 "events": [
-                    {"deviceId": "device1", "value": "50%"},
-                    {"deviceId": "device2", "value": "UP"},
-                    {"deviceId": "device3", "value": "DOWN"},
-                    {"deviceId": "device4", "value": "UNKNOWN"},
+                    {"deviceId": "device1", "value": "45%"},
+                    {"deviceId": "device2", "value": "50%:12$"},
+                    {"deviceId": "device3", "value": "UP"},
+                    {"deviceId": "device4", "value": "UP:49$"},
+                    {"deviceId": "device5", "value": "DOWN"},
+                    {"deviceId": "device6", "value": "DOWN:32$"},
+                    {"deviceId": "device7", "value": "UNKNOWN"},
                 ],
             },
         ],
@@ -55,9 +58,19 @@ async def test_coordinator_async_update_data_success(hass: HomeAssistant, mock_c
     data = await coordinator._async_update_data() # noqa: SLF001
 
     assert isinstance(data, MobilusDeviceStateList)
-    assert len(data.devices) == 4
-    assert data.devices["device1"].position == 50
-    assert data.devices["device2"].position == 100
-    assert data.devices["device3"].position == 0
-    assert data.devices["device4"].position is None
+    assert len(data.devices) == 7
+    assert data.devices["device1"].position == 45
+    assert data.devices["device2"].position == 50
+    assert data.devices["device3"].position == 100
+    assert data.devices["device4"].position == 100
+    assert data.devices["device5"].position == 0
+    assert data.devices["device6"].position == 0
+    assert data.devices["device7"].position is None
 
+    assert data.devices["device1"].tilt_position is None
+    assert data.devices["device2"].tilt_position == 12
+    assert data.devices["device3"].tilt_position is None
+    assert data.devices["device4"].tilt_position == 49
+    assert data.devices["device5"].tilt_position is None
+    assert data.devices["device6"].tilt_position == 32
+    assert data.devices["device7"].tilt_position is None

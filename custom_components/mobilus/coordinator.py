@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from datetime import timedelta
 from functools import cached_property
@@ -28,18 +29,39 @@ class MobilusDeviceStateList:
 class MobilusDeviceState:
     data: dict[str, Any]
 
+    # The position of the device.
+    # "50%" -> 50
+    # "UP" -> 100
+    # "DOWN" -> 0
+    # "UP:56$" -> 100
+    # "50%:56$" -> 50
     @cached_property
     def position(self) -> int | None:
-        if self.data["value"].endswith("%"):
-            return int(self.data["value"].rstrip("%"))
+        match = re.search(r"^(\d+)%", self.data["value"])
+
+        if match:
+            return int(match.group(1))
 
         # To prevent additonal polling to get the current position,
         # assume that opening shutter will be 100% and closing will be 0%.
         # If stop is sent the status will be synchronized
-        if self.data["value"] == "UP":
+        if "UP" in self.data["value"]:
             return 100
-        if self.data["value"] == "DOWN":
+
+        if "DOWN" in self.data["value"]:
             return 0
+
+        return None
+
+    # The tilt position of the device.
+    # "50%:100$" -> 100
+    # "DOWN:49$" -> 49
+    @cached_property
+    def tilt_position(self) -> int | None:
+        match = re.search(r":(\d+)\$", self.data["value"])
+
+        if match:
+            return int(match.group(1))
 
         return None
 
