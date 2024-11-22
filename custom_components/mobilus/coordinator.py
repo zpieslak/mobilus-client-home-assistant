@@ -2,11 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
-import re
-from dataclasses import dataclass
 from datetime import timedelta
-from functools import cached_property
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
@@ -14,6 +11,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .const import DOMAIN
+from .device_state import MobilusDeviceState, MobilusDeviceStateList
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -21,49 +19,6 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-@dataclass
-class MobilusDeviceStateList:
-    devices: dict[str, MobilusDeviceState]
-
-@dataclass
-class MobilusDeviceState:
-    data: dict[str, Any]
-
-    # The position of the device.
-    # "50%" -> 50
-    # "UP" -> 100
-    # "DOWN" -> 0
-    # "UP:56$" -> 100
-    # "50%:56$" -> 50
-    @cached_property
-    def position(self) -> int | None:
-        match = re.search(r"^(\d+)%", self.data["value"])
-
-        if match:
-            return int(match.group(1))
-
-        # To prevent additonal polling to get the current position,
-        # assume that opening shutter will be 100% and closing will be 0%.
-        # If stop is sent the status will be synchronized
-        if "UP" in self.data["value"]:
-            return 100
-
-        if "DOWN" in self.data["value"]:
-            return 0
-
-        return None
-
-    # The tilt position of the device.
-    # "50%:100$" -> 100
-    # "DOWN:49$" -> 49
-    @cached_property
-    def tilt_position(self) -> int | None:
-        match = re.search(r":(\d+)\$", self.data["value"])
-
-        if match:
-            return int(match.group(1))
-
-        return None
 
 class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]):
     def __init__(self, hass: HomeAssistant, client: MobilusClientApp) -> None:
@@ -88,7 +43,11 @@ class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]):
 
         return MobilusDeviceStateList(
             {
-                device_state["deviceId"]: MobilusDeviceState(device_state)
+                device_state["deviceId"]: MobilusDeviceState(
+                    device_id=device_state["deviceId"],
+                    event_number=device_state["eventNumber"],
+                    value=device_state["value"],
+                )
                 for device_state in device_states
             },
         )

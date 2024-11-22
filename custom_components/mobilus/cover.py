@@ -73,19 +73,19 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
     def is_closed(self) -> bool | None:
         device_status = self.coordinator.data.devices.get(self.device["id"])
 
-        if not device_status or not isinstance(device_status.position, int):
+        if not device_status or not isinstance(device_status.cover_position, int):
           return None
 
-        return device_status.position == 0
+        return device_status.cover_position == 0
 
     @property
     def current_cover_position(self) -> int | None:
         device_status = self.coordinator.data.devices.get(self.device["id"])
 
-        if not device_status or not isinstance(device_status.position, int):
+        if not device_status or not isinstance(device_status.cover_position, int):
           return None
 
-        return device_status.position
+        return device_status.cover_position
 
     @property
     def current_tilt_position(self) -> int | None:

@@ -161,7 +161,7 @@ def test_cover_supported_features_cosmo_czr(mock_client: Mock, mock_coordinator:
 
 def test_cover_is_closed_true(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
-    device_status.position = 0
+    device_status.cover_position = 0
 
     mock_coordinator.data.devices = {
         "3": device_status,
@@ -177,7 +177,7 @@ def test_cover_is_closed_true(mock_client: Mock, mock_coordinator: Mock) -> None
 
 def test_cover_is_closed_false(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
-    device_status.position = 100
+    device_status.cover_position = 100
 
     mock_coordinator.data.devices = {
         "3": device_status,
@@ -208,7 +208,7 @@ def test_cover_is_closed_no_device_status(mock_client: Mock, mock_coordinator: M
 
 def test_cover_is_closed_no_position(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
-    device_status.position = None
+    device_status.cover_position = None
 
     mock_coordinator.data.devices = {
         "3": device_status,
@@ -224,7 +224,7 @@ def test_cover_is_closed_no_position(mock_client: Mock, mock_coordinator: Mock) 
 
 def test_cover_current_cover_position(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
-    device_status.position = 50
+    device_status.cover_position = 50
 
     mock_coordinator.data.devices = {
         "3": device_status,
@@ -255,7 +255,7 @@ def test_cover_current_cover_position_no_device_status(mock_client: Mock, mock_c
 
 def test_cover_current_cover_position_no_position(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
-    device_status.position = None
+    device_status.cover_position = None
 
     mock_coordinator.data.devices = {
         "3": device_status,
