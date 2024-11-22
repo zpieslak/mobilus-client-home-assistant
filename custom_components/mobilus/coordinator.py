@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
 from datetime import timedelta
-from functools import cached_property
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
@@ -13,6 +11,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .const import DOMAIN
+from .device_state import MobilusDeviceState, MobilusDeviceStateList
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -20,28 +19,6 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-@dataclass
-class MobilusDeviceStateList:
-    devices: dict[str, MobilusDeviceState]
-
-@dataclass
-class MobilusDeviceState:
-    data: dict[str, Any]
-
-    @cached_property
-    def position(self) -> int | None:
-        if self.data["value"].endswith("%"):
-            return int(self.data["value"].rstrip("%"))
-
-        # To prevent additonal polling to get the current position,
-        # assume that opening shutter will be 100% and closing will be 0%.
-        # If stop is sent the status will be synchronized
-        if self.data["value"] == "UP":
-            return 100
-        if self.data["value"] == "DOWN":
-            return 0
-
-        return None
 
 class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]):
     def __init__(self, hass: HomeAssistant, client: MobilusClientApp) -> None:
@@ -66,7 +43,11 @@ class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]):
 
         return MobilusDeviceStateList(
             {
-                device_state["deviceId"]: MobilusDeviceState(device_state)
+                device_state["deviceId"]: MobilusDeviceState(
+                    device_id=device_state["deviceId"],
+                    event_number=device_state["eventNumber"],
+                    value=device_state["value"],
+                )
                 for device_state in device_states
             },
         )

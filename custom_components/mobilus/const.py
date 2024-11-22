@@ -17,6 +17,10 @@ POSITION_SUPPORTED_DEVICES = (
     MobilusDevice.SENSO_Z,
 )
 
+TILT_SUPPORTED_DEVICES = (
+    MobilusDevice.COSMO_CZR,
+)
+
 SUPPORTED_DEVICES = (
     MobilusDevice.CMR,
     MobilusDevice.COSMO,
