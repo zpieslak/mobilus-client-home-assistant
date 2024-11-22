@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -10,6 +10,8 @@ from custom_components.mobilus.const import DOMAIN
 from custom_components.mobilus.cover import MobilusCover, async_setup_entry
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from homeassistant.core import HomeAssistant
     from pytest_homeassistant_custom_component.common import MockConfigEntry
 
