@@ -7,7 +7,7 @@ This integration allows you to control Mobilus Cosmo GTW devices from Home Assis
 
 ## Prerequisites
 
-- Home Assistant installation version `2024.4.0` or later (earlier versions are available in older releases - see `hacs.json` for details).
+- Home Assistant installation version `2025.3.0` or later (earlier versions are available in older releases - see `hacs.json` for details).
 - Local access to the Mobilus Cosmo GTW IP address and valid login credentials. Internet access is not required and can be disabled on the Mobilus Cosmo GTW device.
 
 ## Installation
