@@ -51,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.warning("No supported devices found in the devices list.")
         return False
 
-    coordinator = MobilusCoordinator(hass, client)
+    coordinator = MobilusCoordinator(hass, client, entry.data["refresh_interval"])
 
     hass.data[DOMAIN][entry.entry_id] = {
         "client": client,
@@ -71,3 +71,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    if config_entry.version == 1:
+        data = dict(config_entry.data)
+
+        if "refresh_interval" not in data:
+            data["refresh_interval"] = 600
+
+    hass.config_entries.async_update_entry(config_entry, data=data)
+
+    return True

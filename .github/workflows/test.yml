@@ -26,4 +26,4 @@ jobs:
       - name: Test
         run: coverage run -m pytest -v
       - name: Verify coverage
-        run: coverage report --fail-under=95
+        run: coverage report --fail-under=100

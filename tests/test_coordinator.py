@@ -17,23 +17,29 @@ def mock_client() -> Generator[Mock, None, None]:
         mock_instance = mock_client_class.return_value
         yield mock_instance
 
-def test_coordinator_init(hass: HomeAssistant, mock_client: Mock) -> None:
-    coordinator = MobilusCoordinator(hass, mock_client)
+@pytest.fixture
+def mock_refresh_interval() -> int:
+    return 600
+
+def test_coordinator_init(hass: HomeAssistant, mock_client: Mock, mock_refresh_interval: int) -> None:
+    coordinator = MobilusCoordinator(hass, mock_client, mock_refresh_interval)
 
     assert coordinator.client == mock_client
     assert coordinator.name == "mobilus_coordinator"
-    assert coordinator.update_interval == datetime.timedelta(seconds=600)
+    assert coordinator.update_interval == datetime.timedelta(seconds=mock_refresh_interval)
 
-async def test_coordinator_async_update_data_no_devices(hass: HomeAssistant, mock_client: Mock) -> None:
+async def test_coordinator_async_update_data_no_devices(
+        hass: HomeAssistant, mock_client: Mock, mock_refresh_interval: int) -> None:
     mock_client.call.return_value = json.dumps([])
 
-    coordinator = MobilusCoordinator(hass, mock_client)
+    coordinator = MobilusCoordinator(hass, mock_client, mock_refresh_interval)
 
     with pytest.raises(UpdateFailed):
         await coordinator._async_update_data() # noqa: SLF001
 
 
-async def test_coordinator_async_update_data_success(hass: HomeAssistant, mock_client: Mock) -> None:
+async def test_coordinator_async_update_data_success(
+        hass: HomeAssistant, mock_client: Mock, mock_refresh_interval: int) -> None:
     mock_client.call.return_value = json.dumps(
         [
             {
@@ -54,7 +60,7 @@ async def test_coordinator_async_update_data_success(hass: HomeAssistant, mock_c
         ],
     )
 
-    coordinator = MobilusCoordinator(hass, mock_client)
+    coordinator = MobilusCoordinator(hass, mock_client, mock_refresh_interval)
     data = await coordinator._async_update_data() # noqa: SLF001
 
     assert isinstance(data, MobilusDeviceStateList)

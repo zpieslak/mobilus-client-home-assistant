@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.mobilus import async_setup_entry, async_unload_entry
+from custom_components.mobilus import async_migrate_entry, async_setup_entry, async_unload_entry
 from custom_components.mobilus.const import DOMAIN, PLATFORMS
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
     from homeassistant.core import HomeAssistant
-    from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 @pytest.fixture
 def mock_forward_entry_setups(hass: HomeAssistant) -> Generator[AsyncMock, None, None]:
@@ -25,11 +25,21 @@ def mock_unload_platforms(hass: HomeAssistant) -> Generator[AsyncMock, None, Non
     with patch.object(hass.config_entries, "async_unload_platforms", new=AsyncMock()) as mock_unload_platforms:
         yield mock_unload_platforms
 
-
 @pytest.fixture
 def mock_logger() -> Generator[Mock, None, None]:
     with patch("custom_components.mobilus._LOGGER", autospec=True) as mock_logger:
         yield mock_logger
+
+@pytest.fixture
+def mock_config_entry_v1() -> MockConfigEntry:
+    return MockConfigEntry(
+        domain=DOMAIN,
+        data = {
+            "host": "test_host",
+            "username": "test_user",
+            "password": "test_pass",
+        },
+    )
 
 async def test_async_setup_entry(
         hass: HomeAssistant, mock_client: Mock, mock_config_entry: MockConfigEntry,
@@ -222,3 +232,18 @@ async def test_async_setup_unload_entry_false(
     assert not result
     assert mock_unload_platforms.call_count == 1
     assert hass.data[DOMAIN][mock_config_entry.entry_id] == hass_domain
+
+async def test_async_migrate_entry(
+        hass: HomeAssistant, mock_config_entry_v1: MockConfigEntry) -> None:
+
+    mock_config_entry_v1.add_to_hass(hass)
+
+    result = await async_migrate_entry(hass, mock_config_entry_v1)
+
+    assert result
+    assert mock_config_entry_v1.data == {
+        "host": "test_host",
+        "username": "test_user",
+        "password": "test_pass",
+        "refresh_interval": 600,
+    }

@@ -21,14 +21,16 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class MobilusCoordinator(DataUpdateCoordinator[MobilusDeviceStateList]):
-    def __init__(self, hass: HomeAssistant, client: MobilusClientApp) -> None:
+    def __init__(self, hass: HomeAssistant, client: MobilusClientApp, refresh_interval: int) -> None:
         self.client = client
+
+        _LOGGER.info("Coordinator initialized with refresh interval %s", refresh_interval)
 
         super().__init__(
             hass,
             _LOGGER,
             name=f"{DOMAIN}_coordinator",
-            update_interval=timedelta(seconds=600),
+            update_interval=timedelta(seconds=refresh_interval),
         )
 
     async def _async_update_data(self) -> MobilusDeviceStateList:
