@@ -30,5 +30,6 @@ def mock_config_entry() -> MockConfigEntry:
             "host": "test_host",
             "username": "test_user",
             "password": "test_pass",
+            "refresh_interval": 600,
         },
     )

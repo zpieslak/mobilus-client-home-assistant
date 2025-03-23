@@ -9,7 +9,7 @@ from .const import DOMAIN
 
 
 class MobilusConfigFlow(ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+    VERSION = 2
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
@@ -50,4 +50,5 @@ class MobilusConfigFlow(ConfigFlow, domain=DOMAIN):
             vol.Required("host", default=defaults.get("host", None)): str,
             vol.Required("username", default=defaults.get("username", None)): str,
             vol.Required("password", default=defaults.get("password", None)): str,
+            vol.Required("refresh_interval", default=defaults.get("refresh_interval", 600)): int,
         })

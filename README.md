@@ -33,13 +33,14 @@ cp -r custom_components/mobilus /var/lib/home_assistant/custom_components/
 
 Once installed, add the integration to your Home Assistant instance through UI (Settings -> Devices & Services -> Add Integration -> Mobilus COSMO GTW) and follow the UI configure setup.
 
-If needed the setup can be reconfigured through "Reconfigure" in the integration settings.
+If needed the setup can be reconfigured through "Reconfigure" in the integration settings. Possible values are the IP address, username, password, and refresh interval.
 
 Example configuration:
 
     host: 192.168.2.1
     username: admin
     password: mypassword
+    refresh_interval: 600
 
 
 ## Caveats
@@ -48,7 +49,7 @@ Currently, the integration supports Mobilus COSMO 2WAY shutters (CMR, COSMO, COS
 
 The Mobilus COSMO 2WAY shutters state is updated every 10 minutes or on each action (open, close, stop).
 
-If state updates are not working, please restart COSMO GTW device, it looks like it forcefully refreshes the state on each boot.
+If state updates are not working, please restart COSMO GTW device, it looks like it forcefully refreshes the state on each boot. For a more automated solution, you can use a smart plug that simply powers the device on and off periodically (i.e. every 24 hours).
 
 ## Usage
 

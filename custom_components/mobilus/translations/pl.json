@@ -7,7 +7,8 @@
         "data": {
           "host": "Adres IP / Host",
           "username": "Nazwa użytkownika",
-          "password": "Hasło"
+          "password": "Hasło",
+          "refresh_interval": "Interwał odświeżania stanu (w sekundach)"
         }
       },
       "reconfigure": {
@@ -16,7 +17,8 @@
         "data": {
           "host": "Adres IP / Host",
           "username": "Nazwa użytkownika",
-          "password": "Hasło"
+          "password": "Hasło",
+          "refresh_interval": "Interwał odświeżania stanu (w sekundach)"
         }
       }
     },
