@@ -6,8 +6,8 @@ class MobilusDevice(IntEnum):
     COSMO = 2
     CMR = 3
     CGR = 4
-    SWITCH = 5
-    SWITCH_NP = 6
+    CSW = 5 # SWITCH
+    CSWP = 6 # SWITCH_NP
     COSMO_CZR = 7
     COSMO_MZR = 8
     SENSO_Z = 9

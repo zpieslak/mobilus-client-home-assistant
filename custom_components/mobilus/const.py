@@ -4,12 +4,15 @@ from .device import MobilusDevice
 
 DOMAIN = "mobilus"
 
-PLATFORMS = [Platform.COVER]
+PLATFORMS = [Platform.COVER, Platform.SWITCH]
 
 NOT_SUPPORTED_DEVICES = (
     MobilusDevice.CGR,
-    MobilusDevice.SWITCH,
-    MobilusDevice.SWITCH_NP,
+)
+# Urządzenia typu C-SW, C-SWP (Cosmo Switch, Cosmo Switch Plug)
+SWITCH_DEVICES = (
+    MobilusDevice.CSW,
+    MobilusDevice.CSWP,
 )
 
 POSITION_SUPPORTED_DEVICES = (

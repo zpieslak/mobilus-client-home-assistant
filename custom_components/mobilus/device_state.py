@@ -36,6 +36,13 @@ class MobilusDeviceState:
 
         return self._main_position
 
+    @property
+    def state(self) -> str | None:
+        # Stan jako tekst: ON, OFF, UP, DOWN, STOP, itd.
+        if isinstance(self._main_position, str):
+            return self._main_position
+        return None
+
     @cached_property
     def tilt_position(self) -> int | None:
         if isinstance(self._main_position, str):
@@ -71,3 +78,4 @@ class MobilusDeviceState:
             return int(main[:-1])
 
         return main
+

@@ -11,14 +11,16 @@ if TYPE_CHECKING:
 from mobilus_client.app import App as MobilusClientApp
 from mobilus_client.config import Config as MobilusClientConfig
 
-from .const import DOMAIN, PLATFORMS, SUPPORTED_DEVICES
+from .const import DOMAIN, PLATFORMS, SUPPORTED_DEVICES, SWITCH_DEVICES
 from .coordinator import MobilusCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
 
+    # Konfiguracja klienta Mobilus
     client_config = MobilusClientConfig(
         gateway_host=entry.data["host"],
         user_login=entry.data["username"],
@@ -26,7 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     client = MobilusClientApp(client_config)
 
-    # Retrieve devices list
+    # Pobranie listy urządzeń
     response = await hass.async_add_executor_job(
         lambda: json.loads(client.call([("devices_list", {})])),
     )
@@ -41,28 +43,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.warning("No devices found in the devices list.")
         return False
 
-    # Currently non cover devices are not supported
-    supported_devices = [
-        device for device in devices
-        if device["type"] in SUPPORTED_DEVICES
-    ]
+    # Moduły C-SW i C-SWP
+    switch_devices = [d for d in devices if d["type"] in SWITCH_DEVICES]
+    
+    # Usuń z cover_devices te, które są już w switch_devices
+    cover_devices = [d for d in devices if d["type"] in SUPPORTED_DEVICES and d["type"] not in SWITCH_DEVICES]
 
-    if not supported_devices:
-        _LOGGER.warning("No supported devices found in the devices list.")
+    if not cover_devices and not switch_devices:
+        _LOGGER.warning("No supported Mobilus devices found.")
         return False
 
-    coordinator = MobilusCoordinator(hass, client, entry.data["refresh_interval"])
+    # Koordynator do odświeżania stanów
+    refresh_interval = entry.data.get("refresh_interval", 600)
+    coordinator = MobilusCoordinator(hass, client, refresh_interval)
 
+    # Zapis danych w HA
+    all_devices = cover_devices + switch_devices
     hass.data[DOMAIN][entry.entry_id] = {
         "client": client,
         "coordinator": coordinator,
-        "devices": supported_devices,
+        "cover_devices": cover_devices,
+        "switch_devices": switch_devices,
+        "devices": all_devices,
     }
 
     await coordinator.async_config_entry_first_refresh()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
@@ -72,6 +81,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unload_ok
 
+
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     if config_entry.version == 1:
         data = dict(config_entry.data)
@@ -79,6 +89,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         if "refresh_interval" not in data:
             data["refresh_interval"] = 600
 
-    hass.config_entries.async_update_entry(config_entry, data=data)
+        hass.config_entries.async_update_entry(config_entry, data=data)
 
     return True
