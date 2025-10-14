@@ -55,6 +55,7 @@ async def test_coordinator_async_update_data_success(
                     {"deviceId": "device08", "value": "DOWN:32$", "eventNumber": 8},
                     {"deviceId": "device09", "value": "56%:$", "eventNumber": 8},
                     {"deviceId": "device10", "value": "UNKNOWN", "eventNumber": 8},
+                    {"deviceId": "device11", "value": "ON", "eventNumber": 8},
                 ],
             },
         ],
@@ -64,7 +65,7 @@ async def test_coordinator_async_update_data_success(
     data = await coordinator._async_update_data() # noqa: SLF001
 
     assert isinstance(data, MobilusDeviceStateList)
-    assert len(data.devices) == 11
+    assert len(data.devices) == 12
     assert data.devices["device00"].cover_position == 45
     assert data.devices["device01"].cover_position == 12
     assert data.devices["device02"].cover_position == 50
@@ -88,3 +89,5 @@ async def test_coordinator_async_update_data_success(
     assert data.devices["device08"].tilt_position == 32
     assert data.devices["device09"].tilt_position is None
     assert data.devices["device10"].tilt_position is None
+
+    assert data.devices["device11"].is_on is True
