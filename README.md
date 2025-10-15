@@ -45,9 +45,9 @@ Example configuration:
 
 ## Caveats
 
-Currently, the integration supports Mobilus COSMO 2WAY shutters (CMR, COSMO, COSMO_CZR, COSMO_MZR, SENSO, and SENSO_Z). Other devices compatible with the Mobilus Cosmo GTW (CGR, SWITCH, SWITCH_NP) are not supported by this plugin at this time, as they do not provide the Mobilus shutter API and I am unable to test them.
+Currently, the integration supports Mobilus COSMO 2WAY shutters (CMR, COSMO, COSMO_CZR, COSMO_MZR, SENSO, and SENSO_Z) and switches (SWITCH, SWITCH_NP). Other devices compatible with the Mobilus Cosmo GTW (CGR) are not supported by this plugin at this time, as I do not have access to these devices for testing. Contributions are welcome!
 
-The Mobilus COSMO 2WAY shutters state is updated every 10 minutes or on each action (open, close, stop).
+The Mobilus COSMO 2WAY devices state is updated every 10 minutes or on each action (open, close, stop, turn on, turn off).
 
 If state updates are not working, please restart COSMO GTW device, it looks like it forcefully refreshes the state on each boot. For a more automated solution, you can use a smart plug that simply powers the device on and off periodically (i.e. every 24 hours).
 

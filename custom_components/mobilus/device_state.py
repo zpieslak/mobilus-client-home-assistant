@@ -13,6 +13,9 @@ class MobilusDeviceStateList:
 @dataclass
 class MobilusDeviceState:
     EVENT_NUMBER_MOVING = 7
+    STATE_DOWN = "DOWN"
+    STATE_ON = "ON"
+    STATE_UP = "UP"
 
     device_id: str
     event_number: int
@@ -20,10 +23,10 @@ class MobilusDeviceState:
 
     @cached_property
     def cover_position(self) -> int | None:
-        if self._main_position == "UP":
+        if self._main_position == self.STATE_UP:
             return 100
 
-        if self._main_position == "DOWN":
+        if self._main_position == self.STATE_DOWN:
             return 0
 
         # Reject STOP or other non-numeric position for cover
@@ -46,6 +49,10 @@ class MobilusDeviceState:
             return self._main_position
 
         return self._additional_position
+
+    @cached_property
+    def is_on(self) -> bool:
+        return self._main_position == self.STATE_ON
 
     @cached_property
     def _is_moving(self) -> bool:

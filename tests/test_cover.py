@@ -28,15 +28,20 @@ async def test_async_setup_entry(
         hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock,
         mock_config_entry: MockConfigEntry, mock_async_add_entities: Mock) -> None:
 
+    device_cosmo = {
+        "id": "1",
+        "name": "Device COSMO",
+        "type": 2,
+    }
     device_senso = {
         "id": "0",
         "name": "Device SENSO",
         "type": 1,
     }
-    device_cosmo = {
-        "id": "1",
-        "name": "Device COSMO",
-        "type": 2,
+    device_switch = {
+        "id": "0",
+        "name": "Device SWITCH",
+        "type": 5,
     }
 
     hass.data[DOMAIN] = {}
@@ -44,8 +49,9 @@ async def test_async_setup_entry(
         "client": mock_client,
         "coordinator": mock_coordinator,
         "devices": [
-            device_senso,
             device_cosmo,
+            device_senso,
+            device_switch,
         ],
     }
 

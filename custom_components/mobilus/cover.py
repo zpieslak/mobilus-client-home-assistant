@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.components.cover import CoverDeviceClass, CoverEntity, CoverEntityFeature
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, POSITION_SUPPORTED_DEVICES, TILT_SUPPORTED_DEVICES
+from .const import COVER_DEVICES, COVER_POSITION_DEVICES, COVER_TILT_DEVICES, DOMAIN
 from .coordinator import MobilusCoordinator
 
 if TYPE_CHECKING:
@@ -27,9 +27,10 @@ async def async_setup_entry(
     devices = hass.data[DOMAIN][entry.entry_id]["devices"]
     coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
 
-    async_add_entities(
-      [MobilusCover(device, client, coordinator) for device in devices],
-    )
+    async_add_entities([
+        MobilusCover(device, client, coordinator)
+        for device in devices if device["type"] in COVER_DEVICES
+    ])
 
 class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
     def __init__(self, device: dict[str, Any], client: MobilusClientApp, coordinator: MobilusCoordinator) -> None:
@@ -57,10 +58,10 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
             | CoverEntityFeature.STOP
         )
 
-        if self.device["type"] in POSITION_SUPPORTED_DEVICES:
+        if self.device["type"] in COVER_POSITION_DEVICES:
             supported_features |= CoverEntityFeature.SET_POSITION
 
-        if self.device["type"] in TILT_SUPPORTED_DEVICES:
+        if self.device["type"] in COVER_TILT_DEVICES:
             supported_features |= (
                 CoverEntityFeature.OPEN_TILT
                 | CoverEntityFeature.CLOSE_TILT

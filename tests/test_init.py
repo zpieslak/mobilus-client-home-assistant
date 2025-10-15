@@ -123,6 +123,16 @@ async def test_async_setup_entry(
                 "type": 3,
             },
             {
+              "id": "4",
+              "name": "Device SWITCH",
+              "type": 5,
+            },
+            {
+              "id": "5",
+              "name": "Device SWITCH_NP",
+              "type": 6,
+            },
+            {
                 "id": "6",
                 "name": "Device COSMO_CZR",
                 "type": 7,
@@ -183,8 +193,8 @@ async def test_async_setup_entry_no_supported_devices(
             "devices": [
               {
                 "id": "0",
-                "name": "Device SWITCH",
-                "type": 5,
+                "name": "Device CGR",
+                "type": 4,
               },
           ]},
         ],
