@@ -1,6 +1,6 @@
 ## Mobilus Cosmo GTW Home Assistant Integration
 
-![test workflow](https://github.com/zpieslak/mobilus-client-home-assistant/actions/workflows/test.yml/badge.svg)
+![test workflow](https://github.com/zpieslak/mobilus-client-home-assistant/actions/workflows/ci.yml/badge.svg)
 ![hassfest workflow](https://github.com/zpieslak/mobilus-client-home-assistant/actions/workflows/hassfest.yml/badge.svg)
 
 This integration allows you to control Mobilus Cosmo GTW devices from Home Assistant, specifically the Mobilus COSMO 2WAY shutters. Internally, it uses the [Mobilus client library](https://github.com/zpieslak/mobilus-client) to communicate with the Mobilus Cosmo GTW.
@@ -45,7 +45,7 @@ Example configuration:
 
 ## Caveats
 
-Currently, the integration supports Mobilus COSMO 2WAY shutters (CMR, COSMO, COSMO_CZR, COSMO_MZR, SENSO, and SENSO_Z) and switches (SWITCH, SWITCH_NP). Other devices compatible with the Mobilus Cosmo GTW (CGR) are not supported by this plugin at this time, as I do not have access to these devices for testing. Contributions are welcome!
+The integration currently supports Mobilus COSMO 2WAY shutters (CMR, COSMO, COSMO_CZR, COSMO_MZR, SENSO, and SENSO_Z) and switches (C-SW, C-SWP). Other devices compatible with the Mobilus Cosmo GTW (CGR) aren't supported yet, as I don’t have access to them for testing - but contributions are very welcome!
 
 The Mobilus COSMO 2WAY devices state is updated every 10 minutes or on each action (open, close, stop, turn on, turn off).
 
