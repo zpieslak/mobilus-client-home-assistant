@@ -9,6 +9,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import COVER_DEVICES, COVER_POSITION_DEVICES, COVER_TILT_DEVICES, DOMAIN
 from .coordinator import MobilusCoordinator
+from .device import MobilusDevice
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -48,6 +49,8 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
 
     @property
     def device_class(self) -> CoverDeviceClass:
+        if self.device["type"] == MobilusDevice.CGR:
+            return CoverDeviceClass.GARAGE
         return CoverDeviceClass.SHUTTER
 
     @property
