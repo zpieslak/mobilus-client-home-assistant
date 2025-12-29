@@ -6,11 +6,10 @@ DOMAIN = "mobilus"
 
 PLATFORMS = [Platform.COVER, Platform.SWITCH]
 
-NOT_SUPPORTED_DEVICES = (
-    MobilusDevice.CGR,
-)
+NOT_SUPPORTED_DEVICES = ()
 
 COVER_DEVICES = (
+    MobilusDevice.CGR,
     MobilusDevice.CMR,
     MobilusDevice.COSMO,
     MobilusDevice.COSMO_CZR,
