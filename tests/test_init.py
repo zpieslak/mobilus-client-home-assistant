@@ -123,6 +123,11 @@ async def test_async_setup_entry(
                 "type": 3,
             },
             {
+              "id": "3",
+              "name": "Device CGR",
+              "type": 4,
+            },
+            {
               "id": "4",
               "name": "Device SWITCH",
               "type": 5,
@@ -180,30 +185,6 @@ async def test_async_setup_entry_no_device_in_response(
 
     mock_logger.warning.assert_called_once_with("No devices found in the devices list.")
     assert(hass.data[DOMAIN]) == {}
-    assert mock_coordinator.async_config_entry_first_refresh.call_count == 0
-    assert mock_forward_entry_setups.call_count == 0
-
-async def test_async_setup_entry_no_supported_devices(
-        hass: HomeAssistant, mock_client: Mock, mock_config_entry: MockConfigEntry,
-        mock_coordinator: Mock, mock_forward_entry_setups: AsyncMock, mock_logger: Mock) -> None:
-
-    mock_client.call.return_value = json.dumps(
-        [
-          {
-            "devices": [
-              {
-                "id": "0",
-                "name": "Device CGR",
-                "type": 4,
-              },
-          ]},
-        ],
-    )
-
-    result = await async_setup_entry(hass, mock_config_entry)
-
-    assert not result
-    mock_logger.warning.assert_called_once_with("No supported devices found in the devices list.")
     assert mock_coordinator.async_config_entry_first_refresh.call_count == 0
     assert mock_forward_entry_setups.call_count == 0
 

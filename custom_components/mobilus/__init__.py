@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 from mobilus_client.app import App as MobilusClientApp
 from mobilus_client.config import Config as MobilusClientConfig
 
-from .const import DOMAIN, NOT_SUPPORTED_DEVICES, PLATFORMS
+from .const import DOMAIN, PLATFORMS
 from .coordinator import MobilusCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,22 +41,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.warning("No devices found in the devices list.")
         return False
 
-    # Remove not supported devices
-    supported_devices = [
-        device for device in devices
-        if device["type"] not in NOT_SUPPORTED_DEVICES
-    ]
-
-    if not supported_devices:
-        _LOGGER.warning("No supported devices found in the devices list.")
-        return False
-
     coordinator = MobilusCoordinator(hass, client, entry.data["refresh_interval"])
 
     hass.data[DOMAIN][entry.entry_id] = {
         "client": client,
         "coordinator": coordinator,
-        "devices": supported_devices,
+        "devices": devices,
     }
 
     await coordinator.async_config_entry_first_refresh()

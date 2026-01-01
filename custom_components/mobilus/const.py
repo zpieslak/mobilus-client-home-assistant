@@ -6,10 +6,6 @@ DOMAIN = "mobilus"
 
 PLATFORMS = [Platform.COVER, Platform.SWITCH]
 
-NOT_SUPPORTED_DEVICES = (
-    MobilusDevice.CGR,
-)
-
 COVER_DEVICES = (
     MobilusDevice.CMR,
     MobilusDevice.COSMO,
@@ -26,6 +22,10 @@ COVER_POSITION_DEVICES = (
 
 COVER_TILT_DEVICES = (
     MobilusDevice.COSMO_CZR,
+)
+
+GARAGE_DEVICES = (
+    MobilusDevice.CGR,
 )
 
 SWITCH_DEVICES = (
