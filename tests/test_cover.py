@@ -38,6 +38,11 @@ async def test_async_setup_entry(
         "name": "Device SENSO",
         "type": 1,
     }
+    device_cgr = {
+        "id": "2",
+        "name": "Device CGR",
+        "type": 4,
+    }
     device_switch = {
         "id": "0",
         "name": "Device SWITCH",
@@ -52,6 +57,7 @@ async def test_async_setup_entry(
             device_cosmo,
             device_senso,
             device_switch,
+            device_cgr,
         ],
     }
 
@@ -61,6 +67,7 @@ async def test_async_setup_entry(
       [
           MobilusCover(device_senso, mock_client, mock_coordinator),
           MobilusCover(device_cosmo, mock_client, mock_coordinator),
+          MobilusCover(device_cgr, mock_client, mock_coordinator),
       ],
     )
 
@@ -105,6 +112,17 @@ def test_cover_device_class(mock_client: Mock, mock_coordinator: Mock) -> None:
     cover = MobilusCover(device, mock_client, mock_coordinator)
 
     assert cover.device_class == CoverDeviceClass.SHUTTER
+
+def test_cover_garage_device_class(mock_client: Mock, mock_coordinator: Mock) -> None:
+    device = {
+        "id": "3",
+        "name": "Device CGR",
+        "type": 4,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+
+    assert cover.device_class == CoverDeviceClass.GARAGE
+
 
 def test_cover_supported_features(mock_client: Mock, mock_coordinator: Mock) -> None:
     device = {
@@ -372,6 +390,24 @@ async def test_cover_async_stop_cover(hass: HomeAssistant, mock_client: Mock, mo
         [("call_events", {"device_id": "3", "value": "STOP"})],
     )
     mock_coordinator.async_request_refresh.assert_called_once()
+
+@pytest.mark.usefixtures("mock_asyncio_sleep")
+async def test_cover_garage_async_stop_cover(hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
+    device = {
+        "id": "3",
+        "name": "Device CGR",
+        "type": 4,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+    cover.hass = hass
+
+    await cover.async_stop_cover()
+
+    mock_client.call.assert_called_once_with(
+        [("call_events", {"device_id": "3", "value": "UP"})],
+    )
+    mock_coordinator.async_request_refresh.assert_called_once()
+
 
 async def test_cover_async_set_cover_position(hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
     device = {

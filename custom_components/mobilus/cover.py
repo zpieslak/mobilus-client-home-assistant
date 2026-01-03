@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.components.cover import CoverDeviceClass, CoverEntity, CoverEntityFeature
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import COVER_DEVICES, COVER_POSITION_DEVICES, COVER_TILT_DEVICES, DOMAIN
+from .const import COVER_DEVICES, COVER_POSITION_DEVICES, COVER_TILT_DEVICES, DOMAIN, GARAGE_DEVICES
 from .coordinator import MobilusCoordinator
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ async def async_setup_entry(
 
     async_add_entities([
         MobilusCover(device, client, coordinator)
-        for device in devices if device["type"] in COVER_DEVICES
+        for device in devices if device["type"] in (COVER_DEVICES + GARAGE_DEVICES)
     ])
 
 class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
@@ -48,6 +48,9 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
 
     @property
     def device_class(self) -> CoverDeviceClass:
+        if self.device["type"] in GARAGE_DEVICES:
+            return CoverDeviceClass.GARAGE
+
         return CoverDeviceClass.SHUTTER
 
     @property
@@ -75,7 +78,7 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
         device_status = self.coordinator.data.devices.get(self.device["id"])
 
         if not device_status or not isinstance(device_status.cover_position, int):
-          return None
+            return None
 
         return device_status.cover_position == 0
 
@@ -84,7 +87,7 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
         device_status = self.coordinator.data.devices.get(self.device["id"])
 
         if not device_status or not isinstance(device_status.cover_position, int):
-          return None
+            return None
 
         return device_status.cover_position
 
@@ -118,9 +121,12 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
     async def async_stop_cover(self, **_kwargs: Any) -> None: # noqa: ANN401
         _LOGGER.info("Stopping cover %s", self.device["name"])
 
+        # Use "UP" command for garage doors to stop them as they do not support "STOP"
+        command = "UP" if self.device["type"] in GARAGE_DEVICES else "STOP"
+
         await self.hass.async_add_executor_job(
             self.client.call,
-            [("call_events", {"device_id": self.device["id"], "value": "STOP"})],
+            [("call_events", {"device_id": self.device["id"], "value": command})],
         )
 
         # Added arbitrary delay as proper state is returned after a while
