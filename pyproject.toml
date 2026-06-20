@@ -2,8 +2,8 @@
 name = "mobilus-client-home-assistant"
 dynamic = ["version"]
 dependencies = [
-  "homeassistant>=2025.3.0",
-  "mobilus-client==0.2.0",
+  "homeassistant>=2026.5.0",
+  "mobilus-client==0.2.1",
 ]
 
 [project.optional-dependencies]
