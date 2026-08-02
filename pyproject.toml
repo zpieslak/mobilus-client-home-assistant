@@ -13,7 +13,7 @@ test = [
   "pytest>=8.0",
   "pytest-asyncio>=0.20.0",
   "pytest-homeassistant-custom-component>=0.8",
-  "ruff>=0.9.0",
+  "ruff==0.16.1",
 ]
 
 [tool.setuptools]
@@ -41,11 +41,11 @@ ignore_missing_imports = true
 line-length = 120
 
 [tool.ruff.lint]
-ignore = ["D"]
+ignore = ["CPY001", "D"]
 select = ["ALL"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
 [tool.ruff.lint.extend-per-file-ignores]
-"tests/**/*.py" = ["PLR0913", "PLR2004", "S101"]
+"tests/**/*.py" = ["PLR0913", "PLR0917", "PLR2004", "S101"]
