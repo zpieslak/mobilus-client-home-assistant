@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+# HA aliases voluptuous to probatio at runtime, which mypy cannot follow.
+# Once minimum HA is 2026.10.0, import probatio directly and remove the schema type ignores.
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 
@@ -20,7 +22,7 @@ class MobilusConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=self._data_schema(),
+            data_schema=self._data_schema(),  # type: ignore[arg-type, unused-ignore]
         )
 
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -40,7 +42,7 @@ class MobilusConfigFlow(ConfigFlow, domain=DOMAIN):
 
          return self.async_show_form(
              step_id="reconfigure",
-             data_schema=self._data_schema(dict(reconfigure_entry.data)),
+             data_schema=self._data_schema(dict(reconfigure_entry.data)),  # type: ignore[arg-type, unused-ignore]
          )
 
     def _data_schema(self, defaults: dict[str, Any] | None = None) -> vol.Schema:
