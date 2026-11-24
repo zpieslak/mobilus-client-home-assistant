@@ -92,7 +92,7 @@ class MobilusCover(CoordinatorEntity[MobilusCoordinator], CoverEntity):
         return device_status.cover_position
 
     @property
-    def current_tilt_position(self) -> int | None:
+    def current_cover_tilt_position(self) -> int | None:
         device_status = self.coordinator.data.devices.get(self.device["id"])
 
         if not device_status or not isinstance(device_status.tilt_position, int):

@@ -295,7 +295,7 @@ def test_cover_current_cover_position_no_position(mock_client: Mock, mock_coordi
 
     assert cover.current_cover_position is None
 
-def test_cover_current_tilt_position(mock_client: Mock, mock_coordinator: Mock) -> None:
+def test_cover_current_cover_tilt_position(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
     device_status.tilt_position = 50
 
@@ -309,9 +309,9 @@ def test_cover_current_tilt_position(mock_client: Mock, mock_coordinator: Mock) 
     }
     cover = MobilusCover(device, mock_client, mock_coordinator)
 
-    assert cover.current_tilt_position == 50
+    assert cover.current_cover_tilt_position == 50
 
-def test_cover_current_tilt_position_no_device_status(mock_client: Mock, mock_coordinator: Mock) -> None:
+def test_cover_current_cover_tilt_position_no_device_status(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = None
 
     mock_coordinator.data.devices = {
@@ -324,9 +324,9 @@ def test_cover_current_tilt_position_no_device_status(mock_client: Mock, mock_co
     }
     cover = MobilusCover(device, mock_client, mock_coordinator)
 
-    assert cover.current_tilt_position is None
+    assert cover.current_cover_tilt_position is None
 
-def test_cover_current_tilt_position_no_tilt_position(mock_client: Mock, mock_coordinator: Mock) -> None:
+def test_cover_current_cover_tilt_position_no_tilt_position(mock_client: Mock, mock_coordinator: Mock) -> None:
     device_status = Mock()
     device_status.tilt_position = None
 
@@ -340,7 +340,27 @@ def test_cover_current_tilt_position_no_tilt_position(mock_client: Mock, mock_co
     }
     cover = MobilusCover(device, mock_client, mock_coordinator)
 
-    assert cover.current_tilt_position is None
+    assert cover.current_cover_tilt_position is None
+
+@pytest.mark.parametrize("tilt_position", [30, 92])
+def test_cover_tilt_state_attributes(
+    mock_client: Mock, mock_coordinator: Mock, tilt_position: int,
+) -> None:
+    mock_coordinator.data.devices = {
+        "3": Mock(cover_position=0, tilt_position=tilt_position),
+    }
+    device = {
+        "id": "3",
+        "name": "Device COSMO_CZR",
+        "type": 7,
+    }
+    cover = MobilusCover(device, mock_client, mock_coordinator)
+
+    assert cover.state_attributes == {
+        "is_closed": True,
+        "current_position": 0,
+        "current_tilt_position": tilt_position,
+    }
 
 async def test_cover_async_open_cover(hass: HomeAssistant, mock_client: Mock, mock_coordinator: Mock) -> None:
     device = {
